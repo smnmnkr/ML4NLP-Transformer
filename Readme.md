@@ -3,10 +3,10 @@
 ## Usage
 ```bash
 # download the repository to your local machine
-git clone https://github.com/smnmnkr/NLU-Transformer.git
+git clone https://github.com/smnmnkr/ML4NLP-Transformer.git
 
 # move into repository
-cd NLU-Transformer
+cd ML4NLP-Transformer
 
 # install requirements
 make install

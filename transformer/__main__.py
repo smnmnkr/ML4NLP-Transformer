@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 
-from nlutransformer.data.numeric import generate_random_numbers, batchify_random_numbers
-from nlutransformer.nn import Transformer
-from nlutransformer.tasks import train, validate
-from nlutransformer.util import get_device
+from transformer.data.numeric import generate_random_numbers, batchify_random_numbers
+from transformer.nn import Transformer
+from transformer.tasks import train, validate
+from transformer.util import get_device
 
 
 def fit(

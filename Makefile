@@ -1,4 +1,4 @@
-module := nlutransformer
+module := transformer
 
 #
 # run demo:
