@@ -1,90 +1,100 @@
 import torch
+from torch import Tensor
 
-from transformer.utils import get_device, get_tgt_mask
+from transformer.utils import get_device, create_mask, generate_square_subsequent_mask
 
 
-#
-#
-#  -------- train -----------
-#
-def train(model, opt, loss_fn, dataloader) -> float:
-    """
-    Trains a model using opt and loss_fn on given dataloader
+def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
+    src = src.to(get_device())
+    tgt = tgt.to(get_device())
 
-    :param model: transformer model
-    :param opt: pyTorch optimizer
-    :param loss_fn: pyTorch loss function
-    :param dataloader: batched data loader
-    :return: loss value (float)
-    """
+    tgt_input = tgt[:-1, :]
+
+    src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input, pad_idx)
+
+    logits = model(src, tgt_input, src_mask, tgt_mask, src_padding_mask, tgt_padding_mask, src_padding_mask)
+
+    return tgt, logits
+
+
+def train(model: torch.nn.Module, optim, loss_fn, train_dataloader):
     model.train()
-    total_loss: float = 0
+    losses = 0
 
-    for batch in dataloader:
-        loss, _ = _step(model, loss_fn, batch)
+    for src, tgt in train_dataloader:
+        tgt, logits = _step(src, tgt, model)
 
-        opt.zero_grad()
+        optim.zero_grad()
+
+        tgt_out = tgt[1:, :]
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
         loss.backward()
-        opt.step()
 
-        total_loss += loss.detach().item()
+        optim.step()
+        losses += loss.item()
 
-    return total_loss / len(dataloader)
+    return losses / len(train_dataloader)
 
 
-#
-#
-#  -------- validate -----------
-#
-def validate(model, loss_fn, dataloader) -> float:
-    """
-    Validates a model using loss_fn on given dataloader
-
-    :param model: transformer model
-    :param loss_fn: pyTorch loss function
-    :param dataloader: batched data loader
-    :return: loss value (float)
-    """
+def evaluate(model: torch.nn.Module, loss_fn, val_dataloader):
     model.eval()
-    total_loss: float = 0
+    losses = 0
 
-    with torch.no_grad():
-        for batch in dataloader:
-            loss, _ = _step(model, loss_fn, batch)
-            total_loss += loss.detach().item()
+    for src, tgt in val_dataloader:
+        tgt, logits = _step(src, tgt, model)
 
-    return total_loss / len(dataloader)
+        tgt_out = tgt[1:, :]
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
+        losses += loss.item()
+
+    return losses / len(val_dataloader)
 
 
-#
-#
-#  -------- _step -----------
-#
-def _step(model, loss_fn, batch):
-    """
-    Internal data processing and computing function used in train, validate.
+# actual function to translate input sentence into target language
+def translate(model: torch.nn.Module, src_sentence: str):
+    model.eval()
 
-    :param model: transformer model
-    :param loss_fn: pyTorch loss function
-    :param batch: data batch
-    :return: loss tensor, models prediction
-    """
-    x, y = batch[:, 0], batch[:, 1]
-    x, y = torch.tensor(x).to(get_device()), torch.tensor(y).to(get_device())
+    src: Tensor = model.text_transform[model.lang['src']](src_sentence).view(-1, 1)
 
-    # Now we shift the tgt by one so with the <SOS> we predict the token at pos 1
-    y_input = y[:, :-1]
-    y_expected = y[:, 1:]
+    num_tokens = src.shape[0]
+    src_mask: Tensor = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
 
-    # Get mask to mask out the next words
-    sequence_length = y_input.size(1)
-    tgt_mask = get_tgt_mask(sequence_length).to(get_device())
+    tgt_tokens = greedy_decode(
+        model, src, src_mask, max_len=num_tokens + 5, start_symbol='<bos>', end_symbol='<eos>').flatten()
 
-    # Standard training except we pass in y_input and tgt_mask
-    pred = model(x, y_input, tgt_mask)
+    return " ".join(model.vocab_transform[model.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
+        "<bos>", "").replace("<eos>", "")
 
-    # Permute pred to have batch size first again
-    pred = pred.permute(1, 2, 0)
-    loss = loss_fn(pred, y_expected)
 
-    return loss, pred
+# function to generate output sequence using greedy algorithm
+def greedy_decode(
+        model: torch.nn.Module,
+        src: Tensor,
+        src_mask: Tensor,
+        max_len: int,
+        start_symbol: str,
+        end_symbol: str
+):
+
+    src = src.to(get_device())
+    src_mask = src_mask.to(get_device())
+
+    memory = model.encode(src, src_mask)
+    ys = torch.ones(1, 1).fill_(start_symbol).type(torch.long).to(get_device())
+
+    for i in range(max_len - 1):
+        memory = memory.to(get_device())
+        tgt_mask = (generate_square_subsequent_mask(ys.size(0))
+                    .type(torch.bool)).to(get_device())
+
+        out = model.decode(ys, memory, tgt_mask)
+        out = out.transpose(0, 1)
+
+        prob = model.generator(out[:, -1])
+        _, next_word = torch.max(prob, dim=1)
+        next_word = next_word.item()
+
+        ys = torch.cat([ys,
+                        torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=0)
+        if next_word == end_symbol:
+            break

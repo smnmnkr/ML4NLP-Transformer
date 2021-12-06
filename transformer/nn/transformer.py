@@ -1,63 +1,86 @@
-import math
-
 import torch.nn as nn
-import torch.nn.functional as F
+from torch import Tensor
 
 from .positionalencoding import PositionalEncoding
+from .tokenembedding import TokenEmbedding
 
 
 class Transformer(nn.Module):
+    #
+    #
+    #  -------- __init__ -----------
+    #
+    def __init__(self,
+                 num_encoder_layers: int,
+                 num_decoder_layers: int,
+                 emb_size: int,
+                 nhead: int,
+                 src_vocab_size: int,
+                 tgt_vocab_size: int,
+                 dim_feedforward: int,
+                 dropout: float = 0.1):
+        super(Transformer, self).__init__()
 
-    def __init__(
-            self,
-            num_tokens: int,
-            num_outputs: int,
-            dim_model: int = 64,
-            num_heads: int = 2,
-            num_encoder_layers: int = 3,
-            num_decoder_layers: int = 3,
-            dropout: float = 0.1,
-    ):
-        super().__init__()
-
-        self.model_type = "Transformer"
-        self.dim_model = dim_model
-
-        self.positional_encoder = PositionalEncoding(
-            dim_model=dim_model, dropout=dropout, max_len=5000
-        )
-        self.embedding = nn.Embedding(num_tokens, dim_model)
         self.transformer = nn.Transformer(
-            d_model=dim_model,
-            nhead=num_heads,
+            d_model=emb_size,
+            nhead=nhead,
             num_encoder_layers=num_encoder_layers,
             num_decoder_layers=num_decoder_layers,
-            dropout=dropout,
-        )
-        self.out = nn.Linear(dim_model, num_outputs)
+            dim_feedforward=dim_feedforward,
+            dropout=dropout)
 
-    def forward(self, src, tgt, tgt_mask=None, src_pad_mask=None, tgt_pad_mask=None):
-        # Src size must be (batch_size, src sequence length)
-        # Tgt size must be (batch_size, tgt sequence length)
+        self.generator = nn.Linear(emb_size, tgt_vocab_size)
+        self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
+        self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
 
-        # Embedding + positional encoding - Out size = (batch_size, sequence length, dim_model)
-        src = self.embedding(src) * math.sqrt(self.dim_model)
-        tgt = self.embedding(tgt) * math.sqrt(self.dim_model)
-        src = self.positional_encoder(src)
-        tgt = self.positional_encoder(tgt)
+        self.positional_encoding = PositionalEncoding(
+            emb_size, dropout=dropout)
 
-        # We could use the parameter batch_first=True, but our KDL version doesn't support it yet, so we permute
-        # to obtain size (sequence length, batch_size, dim_model),
-        src = src.permute(1, 0, 2)
-        tgt = tgt.permute(1, 0, 2)
+        self.init_weights()
 
-        # Transformer blocks - Out size = (sequence length, batch_size, num_tokens)
-        transformer_out = self.transformer(
-            src,
-            tgt,
-            tgt_mask=tgt_mask,
-            src_key_padding_mask=src_pad_mask,
-            tgt_key_padding_mask=tgt_pad_mask
-        )
+    #
+    #
+    #  -------- forward -----------
+    #
+    def forward(self,
+                src: Tensor,
+                trg: Tensor,
+                src_mask: Tensor,
+                tgt_mask: Tensor,
+                src_padding_mask: Tensor,
+                tgt_padding_mask: Tensor,
+                memory_key_padding_mask: Tensor):
 
-        return F.log_softmax(self.out(transformer_out), -1)
+        src_emb = self.positional_encoding(self.src_tok_emb(src))
+        tgt_emb = self.positional_encoding(self.tgt_tok_emb(trg))
+
+        outs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None,
+                                src_padding_mask, tgt_padding_mask, memory_key_padding_mask)
+
+        return self.generator(outs)
+
+    #
+    #
+    #  -------- encode -----------
+    #
+    def encode(self, src: Tensor, src_mask: Tensor):
+        return self.transformer.encoder(self.positional_encoding(
+            self.src_tok_emb(src)), src_mask)
+
+    #
+    #
+    #  -------- decode -----------
+    #
+    def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
+        return self.transformer.decoder(self.positional_encoding(
+            self.tgt_tok_emb(tgt)), memory,
+            tgt_mask)
+
+    #
+    #
+    #  -------- init_weights -----------
+    #
+    def init_weights(self):
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
