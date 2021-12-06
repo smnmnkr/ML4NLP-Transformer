@@ -1,6 +1,6 @@
 import torch
 
-from transformer.util import get_device, get_tgt_mask
+from transformer.utils import get_device, get_tgt_mask
 
 
 #

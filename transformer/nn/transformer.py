@@ -1,6 +1,7 @@
 import math
 
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .positionalencoding import PositionalEncoding
 
@@ -9,12 +10,13 @@ class Transformer(nn.Module):
 
     def __init__(
             self,
-            num_tokens,
-            dim_model,
-            num_heads,
-            num_encoder_layers,
-            num_decoder_layers,
-            dropout,
+            num_tokens: int,
+            num_outputs: int,
+            dim_model: int = 64,
+            num_heads: int = 2,
+            num_encoder_layers: int = 3,
+            num_decoder_layers: int = 3,
+            dropout: float = 0.1,
     ):
         super().__init__()
 
@@ -32,7 +34,7 @@ class Transformer(nn.Module):
             num_decoder_layers=num_decoder_layers,
             dropout=dropout,
         )
-        self.out = nn.Linear(dim_model, num_tokens)
+        self.out = nn.Linear(dim_model, num_outputs)
 
     def forward(self, src, tgt, tgt_mask=None, src_pad_mask=None, tgt_pad_mask=None):
         # Src size must be (batch_size, src sequence length)
@@ -58,4 +60,4 @@ class Transformer(nn.Module):
             tgt_key_padding_mask=tgt_pad_mask
         )
 
-        return self.out(transformer_out)
+        return F.log_softmax(self.out(transformer_out), -1)
