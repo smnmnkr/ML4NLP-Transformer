@@ -50,19 +50,24 @@ def evaluate(model: torch.nn.Module, loss_fn, val_dataloader):
     return losses / len(val_dataloader)
 
 
-# actual function to translate input sentence into target language
-def translate(model: torch.nn.Module, src_sentence: str):
+# actual function to predict output sentence in target language
+def predict(model: torch.nn.Module, data_handler, src_sentence: str):
     model.eval()
 
-    src: Tensor = model.text_transform[model.lang['src']](src_sentence).view(-1, 1)
+    src: Tensor = data_handler.text_transform[data_handler.lang['src']](src_sentence).view(-1, 1)
 
     num_tokens = src.shape[0]
     src_mask: Tensor = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
 
     tgt_tokens = greedy_decode(
-        model, src, src_mask, max_len=num_tokens + 5, start_symbol='<bos>', end_symbol='<eos>').flatten()
+        model, src, src_mask,
+        max_len=num_tokens + 5,
+        start_symbol=data_handler.special_symbols['<bos>'],
+        end_symbol=data_handler.special_symbols['<eos>']
+    ).flatten()
 
-    return " ".join(model.vocab_transform[model.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
+    return " ".join(
+        data_handler.vocab_transform[data_handler.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
         "<bos>", "").replace("<eos>", "")
 
 
@@ -75,7 +80,6 @@ def greedy_decode(
         start_symbol: str,
         end_symbol: str
 ):
-
     src = src.to(get_device())
     src_mask = src_mask.to(get_device())
 
@@ -98,3 +102,5 @@ def greedy_decode(
                         torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=0)
         if next_word == end_symbol:
             break
+
+    return ys
