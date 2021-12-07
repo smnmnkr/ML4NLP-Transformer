@@ -19,6 +19,10 @@ make run
 ```terminal
 [––– GENERATE VOCABS ---]
 [––– CREATING TRANSFORMER ---]
+[––– TRANSLATE (before train) ---]
+[0] ein mann steht auf einem baugerüst . ->  treat treat treat treat treat treat treat treat treat treat treat treat controls
+[1] männer spielen auf trommeln . ->  treat peoples treat Gentlemen treat treat treat unraveling treat unraveling treat
+[2] ein kind läuft auf einem weg . ->  treat treat treat treat treat treat treat treat treat treat treat controls controls
 [––– BEGIN TRAINING ---]
 [2] 	 loss(train): 4.122 	 loss(val): 3.770 	 time: 260.780s
 [4] 	 loss(train): 3.383 	 loss(val): 3.170 	 time: 462.554s
@@ -40,6 +44,10 @@ make run
 [36] 	 loss(train): 1.238 	 loss(val): 1.983 	 time: 245.439s
 [38] 	 loss(train): 1.199 	 loss(val): 1.974 	 time: 277.088s
 [40] 	 loss(train): 1.163 	 loss(val): 1.981 	 time: 280.415s
+[––– TRANSLATE (after train) ---]
+[0] ein mann steht auf einem baugerüst . ->  A female tennis player stands on a tennis court . 
+[1] männer spielen auf trommeln . ->  A tennis player playing the drums . 
+[2] ein kind läuft auf einem weg . ->  A kid is running away on a chain . 
 ```
 
 ## Example Config
