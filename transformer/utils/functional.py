@@ -1,9 +1,8 @@
+import json
 from datetime import datetime
 from functools import wraps
 
 import torch
-
-
 #
 #
 #  -------- get_device -----------
@@ -25,7 +24,6 @@ def get_device() -> torch.device:
 #  -------- generate_square_subsequent_mask -----------
 #
 def generate_square_subsequent_mask(size: int) -> Tensor:
-
     mask = (torch.triu(torch.ones((size, size), device=get_device())) == 1).transpose(0, 1)
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
 
@@ -80,3 +78,13 @@ def time_track(func: callable) -> callable:
         return result
 
     return wrap
+
+
+#
+#
+#  -------- load_json -----------
+#
+def load_json(path: str) -> dict:
+    """Load JSON configuration file."""
+    with open(path) as data:
+        return json.load(data)
