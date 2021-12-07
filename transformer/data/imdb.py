@@ -1,4 +1,7 @@
+from typing import Iterable
+
 import torch
+from torch import Tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 from torchtext.data.utils import get_tokenizer
@@ -7,43 +10,91 @@ from torchtext.vocab import build_vocab_from_iterator
 
 
 class ImdbSentiment:
-
+    #
+    #
+    #  -------- __init__ -----------
+    #
     def __init__(self):
+
+        # Define special symbols and indices
+        self.special_symbols: dict = {
+            '<unk>': 0,
+            '<pad>': 1,
+        }
+
         self.tokenizer = get_tokenizer('basic_english')
 
-        self.train, self.test = IMDB(split=('train', 'test'))
+        self.tgt_vocab = build_vocab_from_iterator(iter([]), specials=['pos', 'neg'])
+        self.src_vocab = build_vocab_from_iterator(
+            self.yield_tokens(IMDB(split='train')),
+            min_freq=1,
+            specials=list(self.special_symbols.keys()),
+            special_first=True
+        )
+        self.src_vocab.set_default_index(self.special_symbols['<unk>'])
 
-        self.vocab = build_vocab_from_iterator(self.yield_tokens(self.train), specials=['<unk>'])
-        self.vocab.set_default_index(self.vocab["<unk>"])
-
-    def yield_tokens(self, data):
+    #
+    #
+    #  -------- yield_tokens -----------
+    #
+    def yield_tokens(self, data: Iterable):
         for _, text in data:
             yield self.tokenizer(text)
 
-    def text_pipeline(self, x):
-        return self.vocab(self.tokenizer(x))
+    #
+    #
+    #  -------- source_transform -----------
+    #
+    def source_transform(self, x: str) -> Tensor:
+        return torch.tensor(self.src_vocab(self.tokenizer(x)))
 
-    def label_pipeline(self, y):
-        return 1.0 if y == 'pos' else 0.0
+    #
+    #
+    #  -------- target_transform -----------
+    #
+    def target_transform(self, y: str) -> Tensor:
+        return torch.tensor(self.tgt_vocab([y]))
 
-    def collate_batch(self, batch):
-        label_list, text_list = [], []
+    #
+    #
+    #  -------- collate_fn -----------
+    #
+    def collate_fn(self, batch: list) -> tuple[Tensor, Tensor]:
+        """
+        Function to collate data samples into batch tensors.
 
-        for (_label, _text) in batch:
+        :param batch:
+        :return:
+        """
+        src_batch, tgt_batch = [], []
 
-            label_list.append(self.label_pipeline(_label))
-            text_list.append(torch.tensor(self.text_pipeline(_text)))
+        for tgt_sample, src_sample in batch:
+            src_batch.append(self.source_transform(src_sample))
+            tgt_batch.append(self.target_transform(tgt_sample))
 
-        return torch.tensor(label_list), pad_sequence(text_list, padding_value=3.0)
+        src_batch = pad_sequence(src_batch, padding_value=self.special_symbols['<pad>'])
+
+        return src_batch, tgt_batch
+
+    #
+    #
+    #  -------- get_dataloader -----------
+    #
+    def get_dataloader(self, split: str = 'train', batch_size: int = 32) -> DataLoader:
+        """
+        Generate PyTorch DataLoader object
+
+        :param split:
+        :param batch_size:
+        :return:
+        """
+        return DataLoader(IMDB(split=split), batch_size=batch_size, collate_fn=self.collate_fn)
 
 
 if __name__ == "__main__":
-    ydata = ImdbSentiment()
+    data = ImdbSentiment()
+    train_dataloader = data.get_dataloader('train')
 
-    print(ydata.train[0])
-
-    train_dataloader = DataLoader(ydata.train, batch_size=1, collate_fn=ydata.collate_batch)
-
-    for idx, batch in enumerate(train_dataloader):
-        print(idx)
-        print(batch)
+    for src, tgt in train_dataloader:
+        print(src)
+        exit()
