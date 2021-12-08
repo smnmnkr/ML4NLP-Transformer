@@ -4,7 +4,8 @@
     "num_decoder_layers": 4,
     "emb_size": 512,
     "nhead": 8,
-    "dim_feedforward": 512
+    "dim_feedforward": 512,
+    "dropout": 0.3
   },
   "optim": {
     "lr": 1e-4,
