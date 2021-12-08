@@ -20,39 +20,62 @@ conda env create -f venv.yml
 make run
 ```
 
-## Example Log
+## Example Log (based on config.json)
 ```terminal
 [––– GENERATE VOCABS ---]
 [––– CREATING TRANSFORMER ---]
 [––– TRANSLATE (before train) ---]
-[0] ein mann steht auf einem baugerüst . ->  treat treat treat treat treat treat treat treat treat treat treat treat controls
-[1] männer spielen auf trommeln . ->  treat peoples treat Gentlemen treat treat treat unraveling treat unraveling treat
-[2] ein kind läuft auf einem weg . ->  treat treat treat treat treat treat treat treat treat treat treat controls controls
+[––– GENERATE VOCABS ---]
+[––– CREATING TRANSFORMER ---]
+[––– TRANSLATE (before train) ---]
+[0] ein mann steht auf einem baugerüst . ->  centipede centipede centipede centipede centipede centipede sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk
+[1] männer spielen auf trommeln . ->  centipede sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk
+[2] ein kind läuft auf einem weg . ->  centipede sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk sidwalk
 [––– BEGIN TRAINING ---]
-[2] 	 loss(train): 4.122 	 loss(val): 3.770 	 time: 260.780s
-[4] 	 loss(train): 3.383 	 loss(val): 3.170 	 time: 462.554s
-[6] 	 loss(train): 2.952 	 loss(val): 2.803 	 time: 452.415s
-[8] 	 loss(train): 2.647 	 loss(val): 2.558 	 time: 300.493s
-[10] 	 loss(train): 2.411 	 loss(val): 2.392 	 time: 265.002s
-[12] 	 loss(train): 2.221 	 loss(val): 2.275 	 time: 268.233s
-[14] 	 loss(train): 2.062 	 loss(val): 2.187 	 time: 265.326s
-[16] 	 loss(train): 1.929 	 loss(val): 2.122 	 time: 267.503s
-[18] 	 loss(train): 1.815 	 loss(val): 2.077 	 time: 267.203s
-[20] 	 loss(train): 1.718 	 loss(val): 2.042 	 time: 272.205s
-[22] 	 loss(train): 1.633 	 loss(val): 2.019 	 time: 266.967s
-[24] 	 loss(train): 1.557 	 loss(val): 2.001 	 time: 266.322s
-[26] 	 loss(train): 1.490 	 loss(val): 1.995 	 time: 267.105s
-[28] 	 loss(train): 1.429 	 loss(val): 1.983 	 time: 271.925s
-[30] 	 loss(train): 1.374 	 loss(val): 1.981 	 time: 261.512s
-[32] 	 loss(train): 1.324 	 loss(val): 1.976 	 time: 273.604s
-[34] 	 loss(train): 1.279 	 loss(val): 1.967 	 time: 268.140s
-[36] 	 loss(train): 1.238 	 loss(val): 1.983 	 time: 245.439s
-[38] 	 loss(train): 1.199 	 loss(val): 1.974 	 time: 277.088s
-[40] 	 loss(train): 1.163 	 loss(val): 1.981 	 time: 280.415s
+[1]      loss(train): 4.868      loss(val): 4.090        time: 42.933s
+[2]      loss(train): 3.909      loss(val): 3.692        time: 42.885s
+[3]      loss(train): 3.582      loss(val): 3.429        time: 42.861s
+[4]      loss(train): 3.357      loss(val): 3.264        time: 42.822s
+[5]      loss(train): 3.180      loss(val): 3.103        time: 42.755s
+[6]      loss(train): 3.006      loss(val): 2.906        time: 42.731s
+[7]      loss(train): 2.824      loss(val): 2.760        time: 42.692s
+[8]      loss(train): 2.679      loss(val): 2.636        time: 43.013s
+[9]      loss(train): 2.526      loss(val): 2.532        time: 42.750s
+[10]     loss(train): 2.392      loss(val): 2.407        time: 42.856s
+[11]     loss(train): 2.274      loss(val): 2.323        time: 42.908s
+[12]     loss(train): 2.171      loss(val): 2.270        time: 42.788s
+[13]     loss(train): 2.079      loss(val): 2.205        time: 42.857s
+[14]     loss(train): 1.997      loss(val): 2.172        time: 42.744s
+[15]     loss(train): 1.928      loss(val): 2.135        time: 42.865s
+[16]     loss(train): 1.860      loss(val): 2.098        time: 42.719s
+[17]     loss(train): 1.802      loss(val): 2.075        time: 42.710s
+[18]     loss(train): 1.745      loss(val): 2.045        time: 42.770s
+[19]     loss(train): 1.696      loss(val): 2.034        time: 42.695s
+[20]     loss(train): 1.647      loss(val): 2.018        time: 42.666s
+[21]     loss(train): 1.605      loss(val): 2.018        time: 42.730s
+[22]     loss(train): 1.563      loss(val): 2.011        time: 42.631s
+[23]     loss(train): 1.525      loss(val): 1.997        time: 42.645s
+[24]     loss(train): 1.489      loss(val): 1.997        time: 42.657s
+[25]     loss(train): 1.454      loss(val): 1.976        time: 42.280s
+[26]     loss(train): 1.422      loss(val): 1.985        time: 42.539s
+[27]     loss(train): 1.393      loss(val): 1.958        time: 42.637s
+[28]     loss(train): 1.360      loss(val): 1.962        time: 42.426s
+[29]     loss(train): 1.335      loss(val): 1.980        time: 42.684s
+[30]     loss(train): 1.305      loss(val): 1.963        time: 42.618s
+[31]     loss(train): 1.279      loss(val): 1.968        time: 42.627s
+[32]     loss(train): 1.256      loss(val): 1.968        time: 42.611s
+[33]     loss(train): 1.231      loss(val): 1.970        time: 42.636s
+[34]     loss(train): 1.208      loss(val): 1.983        time: 42.652s
+[35]     loss(train): 1.183      loss(val): 1.993        time: 42.717s
+[36]     loss(train): 1.160      loss(val): 2.003        time: 42.534s
+[37]     loss(train): 1.142      loss(val): 1.992        time: 42.526s
+[38]     loss(train): 1.120      loss(val): 1.998        time: 42.396s
+[39]     loss(train): 1.101      loss(val): 1.984        time: 42.671s
+[40]     loss(train): 1.083      loss(val): 1.983        time: 42.661s
 [––– TRANSLATE (after train) ---]
-[0] ein mann steht auf einem baugerüst . ->  A female tennis player stands on a tennis court . 
-[1] männer spielen auf trommeln . ->  A tennis player playing the drums . 
-[2] ein kind läuft auf einem weg . ->  A kid is running away on a chain . 
+[0] ein mann steht auf einem baugerüst . ->  A welder standing on a tiled surface . 
+[1] männer spielen auf trommeln . ->  LeBron James plays drums while playing drums . 
+[2] ein kind läuft auf einem weg . ->  A kid running away from a short ledge .  
 ```
 
 ## Example Config (reduced network size)
