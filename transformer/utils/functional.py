@@ -34,7 +34,7 @@ def generate_square_subsequent_mask(size: int) -> Tensor:
 #
 #  -------- create_mask -----------
 #
-def create_mask(src: Tensor, tgt: Tensor, pad_idx: int) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+def create_mask(src: Tensor, tgt: Tensor, pad_idx: int):
     src_seq_len = src.shape[0]
     tgt_seq_len = tgt.shape[0]
 
@@ -43,6 +43,7 @@ def create_mask(src: Tensor, tgt: Tensor, pad_idx: int) -> tuple[Tensor, Tensor,
 
     src_padding_mask = (src == pad_idx).transpose(0, 1)
     tgt_padding_mask = (tgt == pad_idx).transpose(0, 1)
+
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
 
