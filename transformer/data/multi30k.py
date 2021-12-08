@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Iterable, List, Tuple
 
 import torch
 from torch import Tensor
@@ -105,7 +105,7 @@ class Multi30KTranslation:
     #
     #  -------- tensor_transform -----------
     #
-    def collate_fn(self, batch) -> tuple[Tensor, Tensor]:
+    def collate_fn(self, batch) -> Tuple[Tensor, Tensor]:
         """
         Function to collate data samples into batch tensors.
 

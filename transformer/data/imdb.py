@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Tuple
 
 import torch
 from torch import Tensor
@@ -59,7 +59,7 @@ class ImdbSentiment:
     #
     #  -------- collate_fn -----------
     #
-    def collate_fn(self, batch: list) -> tuple[Tensor, Tensor]:
+    def collate_fn(self, batch: list) -> Tuple[Tensor, Tensor]:
         """
         Function to collate data samples into batch tensors.
 

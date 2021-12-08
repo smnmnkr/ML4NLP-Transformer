@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from functools import wraps
+from typing import Tuple
 
 import torch
 #
@@ -34,7 +35,7 @@ def generate_square_subsequent_mask(size: int) -> Tensor:
 #
 #  -------- create_mask -----------
 #
-def create_mask(src: Tensor, tgt: Tensor, pad_idx: int) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+def create_mask(src: Tensor, tgt: Tensor, pad_idx: int) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
     src_seq_len = src.shape[0]
     tgt_seq_len = tgt.shape[0]
 
