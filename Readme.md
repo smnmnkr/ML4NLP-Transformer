@@ -55,7 +55,7 @@ make run
 [2] ein kind läuft auf einem weg . ->  A kid is running away on a chain . 
 ```
 
-## Example Config
+## Example Config (reduced network size)
 ```json
 {
   "model": {
@@ -81,5 +81,5 @@ make run
 
 ## Sources
 
-* PyTorch Transformer, "NLP From Scratch": <https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html>
+* PyTorch Transformer, "NLP From Scratch": <https://pytorch.org/tutorials/beginner/translation_transformer.html>
 * A detailed guide to PyTorch’s nn.Transformer() module: <https://towardsdatascience.com/a-detailed-guide-to-pytorchs-nn-transformer-module-c80afbc9ffb1>
