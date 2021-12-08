@@ -39,7 +39,7 @@ def create_mask(src: Tensor, tgt: Tensor, pad_idx: int) -> tuple[Tensor, Tensor,
     tgt_seq_len = tgt.shape[0]
 
     tgt_mask = generate_square_subsequent_mask(tgt_seq_len)
-    src_mask = torch.zeros((src_seq_len, src_seq_len), device=get_device()).type(torch.bool)
+    src_mask = torch.zeros((src_seq_len, src_seq_len), device=get_device())
 
     src_padding_mask = (src == pad_idx).transpose(0, 1)
     tgt_padding_mask = (tgt == pad_idx).transpose(0, 1)
