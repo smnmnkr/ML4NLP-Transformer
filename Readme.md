@@ -11,7 +11,12 @@ cd ML4NLP-Transformer
 # install requirements
 make install
 
+# or install an conda environment
+conda env create -f venv.yml
+
 # run default configuration
+# if you use conda activate the environment first:
+# conda activate Seq2SeqTransformer
 make run
 ```
 
