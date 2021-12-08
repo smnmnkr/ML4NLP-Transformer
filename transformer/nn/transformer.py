@@ -30,8 +30,8 @@ class Transformer(nn.Module):
             dropout=dropout)
 
         self.generator = nn.Linear(emb_size, tgt_vocab_size)
-        self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
-        self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
+        self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size, dropout=dropout)
+        self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size, dropout=dropout)
 
         self.positional_encoding = PositionalEncoding(
             emb_size, dropout=dropout)

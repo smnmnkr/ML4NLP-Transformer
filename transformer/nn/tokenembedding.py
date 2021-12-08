@@ -9,10 +9,13 @@ class TokenEmbedding(nn.Module):
     #
     #  -------- __init__ -----------
     #
-    def __init__(self, vocab_size: int, emb_size):
+    def __init__(self, vocab_size: int, emb_size: int, dropout: float = 0.0):
         super(TokenEmbedding, self).__init__()
+
         self.embedding = nn.Embedding(vocab_size, emb_size)
         self.emb_size = emb_size
+
+        self.dropout = nn.Dropout(dropout)
 
     #
     #
