@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=data_handler.special_symbols['<pad>'])
     optimizer = torch.optim.Adam(transformer.parameters(), **config['optim'])
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 1)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5)
 
     print("[––– TRANSLATE (before train) ---]")
     for idx, sent in enumerate(config['predict']):
