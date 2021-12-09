@@ -31,8 +31,8 @@ def train(model: torch.nn.Module, optim, scheduler, loss_fn, train_dataloader):
         loss.backward()
 
         optim.step()
-        scheduler.step()
         losses += loss.item()
+        scheduler.step(loss.item())
 
     return losses / len(train_dataloader)
 
