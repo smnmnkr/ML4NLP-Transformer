@@ -71,7 +71,7 @@ if __name__ == "__main__":
         val_loss = evaluate(transformer, loss_fn, val_loader)
         scheduler.step(val_loss)
 
-        if config['epochs'] + 1 % config['report_every'] == 0:
+        if e % config['report_every'] == 0:
             print((
                 f"[{e}] \t loss(train): {train_loss:.3f} \t loss(val): {val_loss:.3f} \t time: {(end_time - start_time):.3f}s"))
 
