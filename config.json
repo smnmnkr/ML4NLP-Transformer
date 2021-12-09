@@ -17,5 +17,6 @@
     "männer spielen auf trommeln .",
     "ein kind läuft auf einem weg ."
   ],
-  "epochs": 40
+  "epochs": 40,
+  "report_every": 5
 }
