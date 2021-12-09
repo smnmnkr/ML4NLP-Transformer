@@ -17,7 +17,7 @@ def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
     return tgt, logits
 
 
-def train(model: torch.nn.Module, optim, scheduler, loss_fn, train_dataloader):
+def train(model: torch.nn.Module, optim, loss_fn, train_dataloader):
     model.train()
     losses = 0
 
@@ -32,7 +32,6 @@ def train(model: torch.nn.Module, optim, scheduler, loss_fn, train_dataloader):
 
         optim.step()
         losses += loss.item()
-        scheduler.step(loss.item())
 
     return losses / len(train_dataloader)
 

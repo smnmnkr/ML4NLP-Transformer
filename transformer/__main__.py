@@ -65,10 +65,11 @@ if __name__ == "__main__":
         val_loader = data_handler.get_dataloader('valid')
 
         start_time = timer()
-        train_loss = train(transformer, optimizer, scheduler, loss_fn, train_loader)
+        train_loss = train(transformer, optimizer, loss_fn, train_loader)
         end_time = timer()
 
         val_loss = evaluate(transformer, loss_fn, val_loader)
+        scheduler.step(val_loss)
 
         if config['epochs'] + 1 % config['report_every'] == 0:
             print((
