@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=data_handler.special_symbols['<pad>'])
     optimizer = torch.optim.Adam(transformer.parameters(), **config['optim'])
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 1)
 
     print("[––– TRANSLATE (before train) ---]")
     for idx, sent in enumerate(config['predict']):
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         val_loader = data_handler.get_dataloader('valid')
 
         start_time = timer()
-        train_loss = train(transformer, optimizer, loss_fn, train_loader)
+        train_loss = train(transformer, optimizer, scheduler, loss_fn, train_loader)
         end_time = timer()
 
         val_loss = evaluate(transformer, loss_fn, val_loader)
