@@ -12,7 +12,7 @@
     "epochs": 200,
     "report_every": 5,
     "optimizer": {
-      "lr": 2e-4,
+      "lr": 1e-4,
       "betas": [
         0.9,
         0.98
@@ -20,7 +20,7 @@
       "eps": 1e-9
     },
     "scheduler": {
-      "factor": 0.5,
+      "factor": 0.95,
       "patience": 10
     }
   },
