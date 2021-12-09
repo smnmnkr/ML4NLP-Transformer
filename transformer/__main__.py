@@ -10,14 +10,6 @@ from transformer.tasks import train, evaluate, predict
 from transformer.utils import get_device, load_json
 
 
-# make pytorch computations deterministic
-# src: https://pytorch.org/docs/stable/notes/randomness.html
-random.seed(42)
-torch.manual_seed(42)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-
-
 #
 #
 #  -------- argparse -----------
@@ -41,6 +33,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config: dict = load_json(args.config)
 
+    # make pytorch computations deterministic
+    # src: https://pytorch.org/docs/stable/notes/randomness.html
+    random.seed(config['training']['seed'])
+    torch.manual_seed(config['training']['seed'])
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     print("[––– GENERATE VOCABS ---]")
     data_handler = Multi30KTranslation()
 
@@ -52,15 +51,15 @@ if __name__ == "__main__":
     ).to(get_device())
 
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=data_handler.special_symbols['<pad>'])
-    optimizer = torch.optim.Adam(transformer.parameters(), **config['optim'])
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+    optimizer = torch.optim.Adam(transformer.parameters(), **config['training']['optimizer'])
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, **config['training']['scheduler'])
 
     print("[––– TRANSLATE (before train) ---]")
     for idx, sent in enumerate(config['predict']):
         print(f"[{idx}] {sent} -> {predict(transformer, data_handler, sent)}")
 
     print("[––– BEGIN TRAINING ---]")
-    for e in range(1, config['epochs'] + 1):
+    for e in range(1, config['training']['epochs'] + 1):
         train_loader = data_handler.get_dataloader('train')
         val_loader = data_handler.get_dataloader('valid')
 
@@ -71,9 +70,13 @@ if __name__ == "__main__":
         val_loss = evaluate(transformer, loss_fn, val_loader)
         scheduler.step(val_loss)
 
-        if e % config['report_every'] == 0:
+        if e % config['training']['report_every'] == 0:
             print((
-                f"[{e}] \t loss(train): {train_loss:.3f} \t loss(val): {val_loss:.3f} \t time: {(end_time - start_time):.3f}s"))
+                f"[{e}]"
+                f"\t loss(train): {train_loss:.3f}"
+                f"\t loss(val): {val_loss:.3f}"
+                f"\t time: {(end_time - start_time):.3f}s"
+            ))
 
     print("[––– TRANSLATE (after train) ---]")
     for idx, sent in enumerate(config['predict']):
