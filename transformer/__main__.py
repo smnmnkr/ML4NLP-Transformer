@@ -1,15 +1,19 @@
-import argparse
-from timeit import default_timer as timer
-import pprint
 from typing import Any
 
-import torch
+import argparse
 import random
+import pprint
+from timeit import default_timer as timer
+
+import torch
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.nn import CrossEntropyLoss
 
 from transformer.data.multi30k import Multi30KTranslation
 from transformer.nn import Transformer
-from transformer.tasks import train, evaluate, predict, save
-from transformer.utils import get_device, load_json
+from transformer.tasks import train, evaluate, predict, save, load
+from transformer.utils import EarlyStopping, get_device, load_json
 
 
 class Main:
@@ -33,10 +37,10 @@ class Main:
         self._write_log(self.config)
 
         # load loss function, optimizer, scheduler
-        self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=self.data.special_symbols['<pad>'])
-        self.optimizer = torch.optim.Adam(self.model.parameters(), **self.config['training']['optimizer'])
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
-                                                                    **self.config['training']['scheduler'])
+        self.loss_fn = CrossEntropyLoss(ignore_index=self.data.special_symbols['<pad>'])
+        self.optimizer = Adam(self.model.parameters(), **self.config['training']['optimizer'])
+        self.scheduler = ReduceLROnPlateau(self.optimizer, **self.config['training']['scheduler'])
+        self.stopper = EarlyStopping()
 
     #
     #
@@ -46,7 +50,6 @@ class Main:
         self.translate()
         self.train()
         self.translate()
-        self.save()
 
     #
     #
@@ -133,6 +136,14 @@ class Main:
 
                 val_loss = evaluate(self.model, self.loss_fn, val_loader)
                 self.scheduler.step(val_loss)
+                self.stopper.step(val_loss)
+
+                if self.stopper.should_save:
+                    self.save()
+
+                if self.stopper.should_stop:
+                    print("[––– Early stopping interrupted training ---]")
+                    break
 
                 self._write_log(format_epoch())
                 if e % self.config['training']['report_every'] == 0:
@@ -142,20 +153,35 @@ class Main:
         except KeyboardInterrupt:
             print("[––– User interrupted training, trying to proceed and save model ---]")
 
+        # load last saved model, if exists
+        finally:
+            try:
+                self.load()
+                print("[––– Loaded best model from checkpoint ---]")
+
+            except FileNotFoundError:
+                print("[––– No saved model found, using internal model ---]")
+
     #
     #
     #  -------- save -----------
     #
     def save(self):
-        print("[––– SAVING MODEL ---]")
         save(self.config['training']['log_path'] + 'model.pth', self.model, self.config['model'])
+
+    #
+    #
+    #  -------- load -----------
+    #
+    def load(self):
+        self.model, _ = load(self.config['training']['log_path'] + 'model.pth', Transformer)
 
     #
     #
     #  -------- _write_log -----------
     #
     def _write_log(self, content: Any):
-        with open(self.config['training']['log_path'] + "train.log", "w") as log_file:
+        with open(self.config['training']['log_path'] + "train.txt", "w") as log_file:
             pprint.pprint(content, log_file)
 
 
@@ -165,4 +191,3 @@ class Main:
 #
 if __name__ == "__main__":
     Main()()
-

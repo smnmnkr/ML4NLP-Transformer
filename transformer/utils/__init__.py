@@ -5,3 +5,5 @@ from .functional import \
     sequential_transforms, \
     time_track, \
     load_json
+
+from .earlystopping import EarlyStopping
