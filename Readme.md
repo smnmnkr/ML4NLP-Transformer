@@ -86,19 +86,32 @@ make run
     "num_decoder_layers": 2,
     "emb_size": 128,
     "nhead": 4,
-    "dim_feedforward": 128
+    "dim_feedforward": 128,
+    "dropout": 0.3
   },
-  "optim": {
-    "lr": 1e-4,
-    "betas": [0.9, 0.98],
-    "eps": 1e-9
+  "training": {
+    "seed": 42,
+    "epochs": 40,
+    "report_every": 5,
+    "log_path": "./results/XX/",
+    "optimizer": {
+      "lr": 1e-4,
+      "betas": [
+        0.9,
+        0.98
+      ],
+      "eps": 1e-9
+    },
+    "scheduler": {
+      "factor": 0.95,
+      "patience": 10
+    }
   },
   "predict": [
     "ein mann steht auf einem baugerüst .",
     "männer spielen auf trommeln .",
     "ein kind läuft auf einem weg ."
-  ],
-  "epochs": 40
+  ]
 }
 ```
 
