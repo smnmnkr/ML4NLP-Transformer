@@ -11,6 +11,7 @@
     "seed": 42,
     "epochs": 200,
     "report_every": 5,
+    "log_path": "./results/01/",
     "optimizer": {
       "lr": 1e-4,
       "betas": [
