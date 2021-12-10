@@ -181,7 +181,7 @@ class Main:
     #  -------- _write_log -----------
     #
     def _write_log(self, content: Any):
-        with open(self.config['training']['log_path'] + "train.txt", "w") as log_file:
+        with open(self.config['training']['log_path'] + "log.txt", "a+") as log_file:
             pprint.pprint(content, log_file)
 
 
