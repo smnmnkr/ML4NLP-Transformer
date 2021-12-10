@@ -37,11 +37,11 @@ class Main:
         # save config to log file
         self._write_log(self.config)
 
-        # load loss function, optimizer, scheduler
+        # load loss function, optimizer, scheduler, stopper
         self.loss_fn = CrossEntropyLoss(ignore_index=self.data.special_symbols['<pad>'])
         self.optimizer = Adam(self.model.parameters(), **self.config['training']['optimizer'])
         self.scheduler = ReduceLROnPlateau(self.optimizer, **self.config['training']['scheduler'])
-        self.stopper = EarlyStopping()
+        self.stopper = EarlyStopping(**self.config['training']['stopper'])
 
     #
     #

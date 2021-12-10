@@ -103,8 +103,12 @@ make run
       "eps": 1e-9
     },
     "scheduler": {
-      "factor": 0.95,
+      "factor": 0.8,
       "patience": 10
+    },
+    "stopper": {
+      "delta": 0.1,
+      "patience": 20
     }
   },
   "predict": [
