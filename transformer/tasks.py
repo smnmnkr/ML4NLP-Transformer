@@ -4,19 +4,10 @@ from torch import Tensor
 from transformer.utils import get_device, create_mask, generate_square_subsequent_mask
 
 
-def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
-    src = src.to(get_device())
-    tgt = tgt.to(get_device())
-
-    tgt_input = tgt[:-1, :]
-
-    src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input, pad_idx)
-
-    logits = model(src, tgt_input, src_mask, tgt_mask, src_padding_mask, tgt_padding_mask, src_padding_mask)
-
-    return tgt, logits
-
-
+#
+#
+#  -------- train -----------
+#
 def train(model: torch.nn.Module, optim, loss_fn, train_dataloader):
     model.train()
     losses = 0
@@ -36,6 +27,10 @@ def train(model: torch.nn.Module, optim, loss_fn, train_dataloader):
     return losses / len(train_dataloader)
 
 
+#
+#
+#  -------- evaluate -----------
+#
 def evaluate(model: torch.nn.Module, loss_fn, val_dataloader):
     model.eval()
     losses = 0
@@ -50,7 +45,10 @@ def evaluate(model: torch.nn.Module, loss_fn, val_dataloader):
     return losses / len(val_dataloader)
 
 
-# actual function to predict output sentence in target language
+#
+#
+#  -------- predict -----------
+#
 def predict(model: torch.nn.Module, data_handler, src_sentence: str):
     model.eval()
 
@@ -59,20 +57,37 @@ def predict(model: torch.nn.Module, data_handler, src_sentence: str):
     num_tokens = src.shape[0]
     src_mask: Tensor = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
 
-    tgt_tokens = greedy_decode(
-        model, src, src_mask,
-        max_len=num_tokens + 5,
-        start_symbol=data_handler.special_symbols['<bos>'],
-        end_symbol=data_handler.special_symbols['<eos>']
-    ).flatten()
+    tgt_tokens = _greedy_decode(model, src, src_mask, max_len=num_tokens + 5,
+                                start_symbol=data_handler.special_symbols['<bos>'],
+                                end_symbol=data_handler.special_symbols['<eos>']).flatten()
 
     return " ".join(
         data_handler.vocab_transform[data_handler.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
         "<bos>", "").replace("<eos>", "")
 
 
-# function to generate output sequence using greedy algorithm
-def greedy_decode(
+#
+#
+#  -------- _step -----------
+#
+def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
+    src = src.to(get_device())
+    tgt = tgt.to(get_device())
+
+    tgt_input = tgt[:-1, :]
+
+    src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input, pad_idx)
+
+    logits = model(src, tgt_input, src_mask, tgt_mask, src_padding_mask, tgt_padding_mask, src_padding_mask)
+
+    return tgt, logits
+
+
+#
+#
+#  -------- _greedy_decode -----------
+#
+def _greedy_decode(
         model: torch.nn.Module,
         src: Tensor,
         src_mask: Tensor,
