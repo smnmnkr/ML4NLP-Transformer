@@ -16,7 +16,7 @@ class EarlyStopping:
 
     def step(self, val_loss: float) -> None:
 
-        if self.smallest_loss is None:
+        if self.smallest_loss is float("inf"):
             self.smallest_loss = val_loss
 
             self.should_save = True
@@ -33,5 +33,5 @@ class EarlyStopping:
             self.smallest_loss = val_loss
             self.counter = 0
 
-            self.should_save: bool = False
+            self.should_save: bool = True
             self.should_stop: bool = False
