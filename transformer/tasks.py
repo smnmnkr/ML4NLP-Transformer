@@ -101,7 +101,7 @@ def load(path: str, model_cls) -> Tuple[torch.nn.Module, Dict[str, Any]]:
     model: torch.nn.Module = model_cls(**checkpoint['model_config'])
     model.load_state_dict(checkpoint['model_state_dict'])
 
-    return (model, {
+    return (model.to(get_device()), {
         'epoch': checkpoint['epoch'],
         'train_loss': checkpoint['train_loss'],
         'val_loss': checkpoint['val_loss'],
