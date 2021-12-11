@@ -47,6 +47,7 @@ make run
 [1] männer spielen auf trommeln . ->  LeBron students are playing the drums . 
 [2] ein kind läuft auf einem weg . ->  A kid is running away from a cliff .   
 ```
+![Loss plot](./results/01/loss.png)
 
 ## Example Config (reduced network size)
 ```json
