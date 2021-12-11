@@ -47,7 +47,7 @@ class Main:
         self.string_format: dict = {
             'epoch': lambda epoch: f"[{epoch}]",
             'loss': lambda name, val: f"loss({name}): {val:.3f}",
-            'duration': lambda start, end: f"\t time: {(end - start):.3f}s"
+            'duration': lambda start, end: f"time: {(end - start):.3f}s"
         }
 
     #
@@ -167,7 +167,7 @@ class Main:
                 print("[––– Loaded best model from checkpoint ---]")
                 print(self.string_format['epoch'](info['epoch']), '\t',
                       self.string_format['loss']('train', info['train_loss']), '\t',
-                      self.string_format['loss']('val', info['val_loss']), '\t'
+                      self.string_format['loss']('val', info['val_loss']),
                       )
 
             except FileNotFoundError:
