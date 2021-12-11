@@ -2,7 +2,7 @@ class EarlyStopping:
 
     def __init__(
             self,
-            delta: float = 0.1,
+            delta: float = 0.02,
             patience: int = 20):
 
         self.delta = delta
