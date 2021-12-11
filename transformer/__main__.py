@@ -153,11 +153,15 @@ class Main:
             self._write_log(self.train_log)
 
             try:
-                self.load()
+                info = self.load()
                 print("[––– Loaded best model from checkpoint ---]")
+                print((f"[{info['epoch']}]"
+                       f"\t loss(train): {info['train_loss']:.3f}"
+                       f"\t loss(val): {info['val_loss']:.3f}"
+                       ))
 
             except FileNotFoundError:
-                print("[––– No saved model found, using internal model ---]")
+                print("[––– No saved model found, last internal model ---]")
 
     #
     #
@@ -170,8 +174,9 @@ class Main:
     #
     #  -------- load -----------
     #
-    def load(self):
-        self.model, _ = load(self.config['training']['log_path'] + 'model.pth', Transformer)
+    def load(self) -> dict:
+        self.model, info = load(self.config['training']['log_path'] + 'model.pth', Transformer)
+        return info
 
     #
     #
