@@ -139,7 +139,7 @@ class Main:
                 self.stopper.step(val_loss)
 
                 if self.stopper.should_save:
-                    self.save()
+                    self.save(e, train_loss, val_loss)
 
                 if self.stopper.should_stop:
                     print("[––– Early stopping interrupted training ---]")
@@ -148,11 +148,11 @@ class Main:
                 # append current data to log, print according to report setting
                 self.train_log.append([e, train_loss, val_loss])
                 if e % self.config['training']['report_every'] == 0:
-                    print((self.string_format['epoch'](e), '\t',
-                           self.string_format['loss']('train', train_loss), '\t',
-                           self.string_format['loss']('val', val_loss), '\t',
-                           self.string_format['duration'](start_time, end_time)
-                           ))
+                    print(self.string_format['epoch'](e), '\t',
+                          self.string_format['loss']('train', train_loss), '\t',
+                          self.string_format['loss']('val', val_loss), '\t',
+                          self.string_format['duration'](start_time, end_time)
+                          )
 
         # handle user keyboard interruption
         except KeyboardInterrupt:
@@ -165,10 +165,10 @@ class Main:
             try:
                 info = self.load()
                 print("[––– Loaded best model from checkpoint ---]")
-                print((self.string_format['epoch'](info['epoch']), '\t',
-                       self.string_format['loss']('train', info['train_loss']), '\t',
-                       self.string_format['loss']('val', info['val_loss']), '\t'
-                       ))
+                print(self.string_format['epoch'](info['epoch']), '\t',
+                      self.string_format['loss']('train', info['train_loss']), '\t',
+                      self.string_format['loss']('val', info['val_loss']), '\t'
+                      )
 
             except FileNotFoundError:
                 print("[––– No saved model found, last internal model ---]")
