@@ -1,16 +1,16 @@
 {
   "model": {
-    "num_encoder_layers": 6,
-    "num_decoder_layers": 6,
+    "num_encoder_layers": 4,
+    "num_decoder_layers": 4,
     "emb_size": 512,
     "nhead": 8,
     "dim_feedforward": 512,
-    "dropout": 0.2
+    "dropout": 0.3
   },
   "training": {
     "seed": 42,
-    "epochs": 250,
-    "report_every": 10,
+    "epochs": 200,
+    "report_every": 5,
     "log_path": "./results/01/",
     "optimizer": {
       "lr": 1e-4,
@@ -21,8 +21,8 @@
       "eps": 1e-9
     },
     "scheduler": {
-      "factor": 0.8,
-      "patience": 10
+      "factor": 0.4,
+      "patience": 5
     },
     "stopper": {
       "delta": 0.02,
