@@ -4,12 +4,12 @@
     "num_decoder_layers": 6,
     "emb_size": 512,
     "nhead": 8,
-    "dim_feedforward": 2048,
-    "dropout": 0.3
+    "dim_feedforward": 512,
+    "dropout": 0.2
   },
   "training": {
     "seed": 42,
-    "epochs": 240,
+    "epochs": 250,
     "report_every": 10,
     "log_path": "./results/01/",
     "optimizer": {
@@ -25,7 +25,7 @@
       "patience": 10
     },
     "stopper": {
-      "delta": 0.1,
+      "delta": 0.02,
       "patience": 20
     }
   },
