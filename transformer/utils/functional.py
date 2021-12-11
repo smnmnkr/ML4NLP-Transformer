@@ -4,13 +4,13 @@ from functools import wraps
 from typing import Tuple
 
 import torch
+from torch import Tensor
+
+
 #
 #
 #  -------- get_device -----------
 #
-from torch import Tensor
-
-
 def get_device() -> torch.device:
     """
     Returns best possible computing device.

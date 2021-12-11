@@ -1,10 +1,118 @@
+from typing import Tuple, Dict, Any
+
 import torch
 from torch import Tensor
+from torch.utils.data import DataLoader
 
 from transformer.utils import get_device, create_mask, generate_square_subsequent_mask
 
 
-def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
+#
+#
+#  -------- train -----------
+#
+def train(
+        model: torch.nn.Module,
+        optim: torch.optim.Optimizer,
+        loss_fn,
+        train_dataloader: DataLoader) -> float:
+    model.train()
+    losses: float = 0
+
+    for src, tgt in train_dataloader:
+        tgt, logits = _step(src, tgt, model)
+
+        optim.zero_grad()
+
+        tgt_out: Tensor = tgt[1:, :]
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
+        loss.backward()
+
+        optim.step()
+        losses += loss.item()
+
+    return losses / len(train_dataloader)
+
+
+#
+#
+#  -------- evaluate -----------
+#
+def evaluate(model: torch.nn.Module, loss_fn, val_dataloader: DataLoader) -> float:
+    model.eval()
+    losses: float = 0
+
+    for src, tgt in val_dataloader:
+        tgt, logits = _step(src, tgt, model)
+
+        tgt_out: Tensor = tgt[1:, :]
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
+        losses += loss.item()
+
+    return losses / len(val_dataloader)
+
+
+#
+#
+#  -------- predict -----------
+#
+def predict(model: torch.nn.Module, data_handler, src_sentence: str) -> str:
+    model.eval()
+
+    src: Tensor = data_handler.text_transform[data_handler.lang['src']](src_sentence).view(-1, 1)
+
+    num_tokens: int = src.shape[0]
+    src_mask: Tensor = (torch.zeros(num_tokens, num_tokens))
+
+    tgt_tokens = _greedy_decode(model, src, src_mask, max_len=num_tokens + 5,
+                                start_symbol=data_handler.special_symbols['<bos>'],
+                                end_symbol=data_handler.special_symbols['<eos>']).flatten()
+
+    return " ".join(
+        data_handler.vocab_transform[data_handler.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
+        "<bos>", "").replace("<eos>", "")
+
+
+#
+#
+#  -------- save -----------
+#
+def save(path: str,
+         model: torch.nn.Module,
+         model_config: dict,
+         epoch: int = 0,
+         train_loss: float = 0,
+         val_loss: float = 0) -> None:
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'model_config': model_config,
+        'epoch': epoch,
+        'train_loss': train_loss,
+        'val_loss': val_loss
+    }, path)
+
+
+#
+#
+#  -------- load -----------
+#
+def load(path: str, model_cls) -> Tuple[torch.nn.Module, Dict[str, Any]]:
+    checkpoint: dict = torch.load(path)
+    model: torch.nn.Module = model_cls(**checkpoint['model_config'])
+    model.load_state_dict(checkpoint['model_state_dict'])
+
+    return (model.to(get_device()), {
+        'epoch': checkpoint['epoch'],
+        'train_loss': checkpoint['train_loss'],
+        'val_loss': checkpoint['val_loss'],
+    })
+
+
+#
+#
+#  -------- _step -----------
+#
+def _step(src: Tensor, tgt: Tensor, model: torch.nn.Module, pad_idx: int = 1):
     src = src.to(get_device())
     tgt = tgt.to(get_device())
 
@@ -17,69 +125,18 @@ def _step(src, tgt, model: torch.nn.Module, pad_idx: int = 1):
     return tgt, logits
 
 
-def train(model: torch.nn.Module, optim, loss_fn, train_dataloader):
-    model.train()
-    losses = 0
-
-    for src, tgt in train_dataloader:
-        tgt, logits = _step(src, tgt, model)
-
-        optim.zero_grad()
-
-        tgt_out = tgt[1:, :]
-        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
-        loss.backward()
-
-        optim.step()
-        losses += loss.item()
-
-    return losses / len(train_dataloader)
-
-
-def evaluate(model: torch.nn.Module, loss_fn, val_dataloader):
-    model.eval()
-    losses = 0
-
-    for src, tgt in val_dataloader:
-        tgt, logits = _step(src, tgt, model)
-
-        tgt_out = tgt[1:, :]
-        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
-        losses += loss.item()
-
-    return losses / len(val_dataloader)
-
-
-# actual function to predict output sentence in target language
-def predict(model: torch.nn.Module, data_handler, src_sentence: str):
-    model.eval()
-
-    src: Tensor = data_handler.text_transform[data_handler.lang['src']](src_sentence).view(-1, 1)
-
-    num_tokens = src.shape[0]
-    src_mask: Tensor = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
-
-    tgt_tokens = greedy_decode(
-        model, src, src_mask,
-        max_len=num_tokens + 5,
-        start_symbol=data_handler.special_symbols['<bos>'],
-        end_symbol=data_handler.special_symbols['<eos>']
-    ).flatten()
-
-    return " ".join(
-        data_handler.vocab_transform[data_handler.lang['tgt']].lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace(
-        "<bos>", "").replace("<eos>", "")
-
-
-# function to generate output sequence using greedy algorithm
-def greedy_decode(
+#
+#
+#  -------- _greedy_decode -----------
+#
+def _greedy_decode(
         model: torch.nn.Module,
         src: Tensor,
         src_mask: Tensor,
         max_len: int,
         start_symbol: str,
         end_symbol: str
-):
+) -> Tensor:
     src = src.to(get_device())
     src_mask = src_mask.to(get_device())
 
@@ -88,8 +145,7 @@ def greedy_decode(
 
     for i in range(max_len - 1):
         memory = memory.to(get_device())
-        tgt_mask = (generate_square_subsequent_mask(ys.size(0))
-                    .type(torch.bool)).to(get_device())
+        tgt_mask = (generate_square_subsequent_mask(ys.size(0))).to(get_device())
 
         out = model.decode(ys, memory, tgt_mask)
         out = out.transpose(0, 1)
