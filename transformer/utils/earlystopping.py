@@ -23,15 +23,14 @@ class EarlyStopping:
             self.smallest_loss = val_loss
             self.should_save = True
 
-        # new loss is larger then smallest plus delta deviation
-        elif val_loss > self.smallest_loss + self.delta:
+        # new loss is smaller then smallest plus delta deviation
+        elif val_loss < self.smallest_loss + self.delta:
+            self.should_save = False
 
+        # new loss is larger then smallest plus delta deviation
+        else:
             self.counter += 1
             self.should_save = False
 
             if self.counter == self.patience:
                 self.should_stop = True
-
-        # new loss is inside the smallest plus delta deviation
-        else:
-            self.counter = 0
