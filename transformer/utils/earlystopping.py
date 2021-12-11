@@ -16,22 +16,22 @@ class EarlyStopping:
 
     def step(self, val_loss: float) -> None:
 
-        if self.smallest_loss is float("inf"):
+        # new loss is smaller then smallest recorded
+        if val_loss < self.smallest_loss:
+
+            self.counter = 0
             self.smallest_loss = val_loss
-
             self.should_save = True
-            self.should_stop = False
 
+        # new loss is larger then smallest plus delta deviation
         elif val_loss > self.smallest_loss + self.delta:
-            self.counter += 1
 
-            if self.counter >= self.patience:
-                self.should_save = False
+            self.counter += 1
+            self.should_save = False
+
+            if self.counter == self.patience:
                 self.should_stop = True
 
+        # new loss is inside the smallest plus delta deviation
         else:
-            self.smallest_loss = val_loss
             self.counter = 0
-
-            self.should_save: bool = True
-            self.should_stop: bool = False
