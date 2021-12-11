@@ -43,6 +43,13 @@ class Main:
         self.scheduler = ReduceLROnPlateau(self.optimizer, **self.config['training']['scheduler'])
         self.stopper = EarlyStopping(**self.config['training']['stopper'])
 
+        # string format utils
+        self.string_format: dict = {
+            'epoch': lambda epoch: f"[{epoch}]",
+            'loss': lambda name, val: f"loss({name}): {val:.3f}",
+            'duration': lambda start, end: f"\t time: {(end - start):.3f}s"
+        }
+
     #
     #
     #  -------- call -----------
@@ -116,14 +123,17 @@ class Main:
         print("[––– BEGIN TRAINING ---]")
         try:
             for e in range(1, self.config['training']['epochs'] + 1):
+
+                # get data loaders (train, validation)
                 train_loader = self.data.get_dataloader('train')
                 val_loader = self.data.get_dataloader('valid')
 
+                # train and measure time
                 start_time = timer()
                 train_loss = train(self.model, self.optimizer, self.loss_fn, train_loader)
                 end_time = timer()
-                duration: float = end_time - start_time
 
+                # evaluate and process scheduler and early stopping
                 val_loss = evaluate(self.model, self.loss_fn, val_loader)
                 self.scheduler.step(val_loss)
                 self.stopper.step(val_loss)
@@ -138,10 +148,10 @@ class Main:
                 # append current data to log, print according to report setting
                 self.train_log.append([e, train_loss, val_loss])
                 if e % self.config['training']['report_every'] == 0:
-                    print((f"[{e}]"
-                           f"\t loss(train): {train_loss:.3f}"
-                           f"\t loss(val): {val_loss:.3f}"
-                           f"\t time: {duration:.3f}s"
+                    print((self.string_format['epoch'](e), '\t',
+                           self.string_format['loss']('train', train_loss), '\t',
+                           self.string_format['loss']('val', val_loss), '\t',
+                           self.string_format['duration'](start_time, end_time)
                            ))
 
         # handle user keyboard interruption
@@ -155,9 +165,9 @@ class Main:
             try:
                 info = self.load()
                 print("[––– Loaded best model from checkpoint ---]")
-                print((f"[{info['epoch']}]"
-                       f"\t loss(train): {info['train_loss']:.3f}"
-                       f"\t loss(val): {info['val_loss']:.3f}"
+                print((self.string_format['epoch'](info['epoch']), '\t',
+                       self.string_format['loss']('train', info['train_loss']), '\t',
+                       self.string_format['loss']('val', info['val_loss']), '\t'
                        ))
 
             except FileNotFoundError:
@@ -167,15 +177,24 @@ class Main:
     #
     #  -------- save -----------
     #
-    def save(self):
-        save(self.config['training']['log_path'] + 'model.pth', self.model, self.config['model'])
+    def save(self, epoch: int, train_loss: float, val_loss: float):
+        save(
+            self.config['training']['log_path'] + 'model.pth',
+            self.model,
+            self.config['model'],
+            epoch=epoch,
+            train_loss=train_loss,
+            val_loss=val_loss
+        )
 
     #
     #
     #  -------- load -----------
     #
     def load(self) -> dict:
-        self.model, info = load(self.config['training']['log_path'] + 'model.pth', Transformer)
+        path_model: str = self.config['training']['log_path'] + 'model.pth'
+
+        self.model, info = load(path_model, Transformer)
         return info
 
     #
@@ -183,7 +202,9 @@ class Main:
     #  -------- _write_log -----------
     #
     def _write_log(self, content: Any):
-        with open(self.config['training']['log_path'] + "log.txt", "a+") as log_file:
+        path_log: str = self.config['training']['log_path'] + "log.txt"
+
+        with open(path_log, "a+") as log_file:
             pprint.pprint(content, log_file)
 
 
