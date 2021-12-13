@@ -11,6 +11,7 @@
     "seed": 42,
     "epochs": 200,
     "report_every": 5,
+    "batch_size": 256,
     "log_path": "./results/01/",
     "optimizer": {
       "lr": 1e-4,
@@ -21,8 +22,8 @@
       "eps": 1e-9
     },
     "scheduler": {
-      "factor": 0.8,
-      "patience": 10,
+      "factor": 0.2,
+      "patience": 5,
       "min_lr": 1e-6
     },
     "stopper": {
