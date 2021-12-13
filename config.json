@@ -10,8 +10,8 @@
   "training": {
     "seed": 42,
     "epochs": 200,
-    "batch_size": 256,
     "report_every": 5,
+    "batch_size": 256,
     "log_path": "./results/01/",
     "optimizer": {
       "lr": 1e-4,

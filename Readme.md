@@ -64,6 +64,7 @@ make run
     "seed": 42,
     "epochs": 40,
     "report_every": 5,
+    "batch_size": 32,
     "log_path": "./results/XX/",
     "optimizer": {
       "lr": 1e-4,
