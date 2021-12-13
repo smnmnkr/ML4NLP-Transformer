@@ -98,4 +98,4 @@ def load_json(path: str) -> dict:
 def save_json(path: str, data: dict):
     """Save JSON configuration file."""
     with open(path, 'w') as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=2)
