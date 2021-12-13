@@ -1,19 +1,18 @@
-from typing import Any
-
 import argparse
+import logging
 import random
-import pprint
+import time
 from timeit import default_timer as timer
 
 import torch
+from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.nn import CrossEntropyLoss
 
 from transformer.data.multi30k import Multi30KTranslation
 from transformer.nn import Transformer
 from transformer.tasks import train, evaluate, predict, save, load
-from transformer.utils import EarlyStopping, get_device, load_json
+from transformer.utils import EarlyStopping, get_device, load_json, save_json
 
 
 class Main:
@@ -25,17 +24,20 @@ class Main:
                  description: str = "ML4NLP Seq2Seq Transformer",
                  data_cls=Multi30KTranslation):
 
-        self.description = description
+        self.start_time: time = time.strftime("%Y%m%d-%H%M%S")
+        self.description: str = description
         self.data_cls = data_cls
-        self.config: dict = self.load_config()
-        self.train_log: list = [['epoch', 'train_loss', 'val_loss']]
 
+        self.config: dict = self.load_config()
+        self.train_log: dict = {"epoch": [], "train_loss": [], "val_loss": []}
+
+        # setup external libs
         self.setup_pytorch()
+        self.setup_logging()
+
+        # load data handler and model
         self.data = self.load_data()
         self.model = self.load_transformer()
-
-        # save config to log file
-        self._write_log(self.config)
 
         # load loss function, optimizer, scheduler, stopper
         self.loss_fn = CrossEntropyLoss(ignore_index=self.data.special_symbols['<pad>'])
@@ -58,6 +60,7 @@ class Main:
         self.translate()
         self.train()
         self.translate()
+        self.write_result()
 
     #
     #
@@ -90,10 +93,26 @@ class Main:
 
     #
     #
+    #  -------- setup_logging -----------
+    #
+    def setup_logging(self):
+        filename: str = self.config['training']['log_path'] + self.start_time + ".log"
+
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] -- %(message)s",
+            handlers=[
+                logging.FileHandler(filename),
+                logging.StreamHandler()
+            ]
+        )
+
+    #
+    #
     #  -------- load_data -----------
     #
     def load_data(self):
-        print("[––– LOAD DATA ---]")
+        logging.info("LOAD DATA")
         return self.data_cls()
 
     #
@@ -101,7 +120,7 @@ class Main:
     #  -------- load_transformer -----------
     #
     def load_transformer(self) -> Transformer:
-        print("[––– LOAD TRANSFORMER ---]")
+        logging.info("LOAD TRANSFORMER")
         self.config['model']['src_vocab_size'] = len(self.data.vocab_transform['de'])
         self.config['model']['tgt_vocab_size'] = len(self.data.vocab_transform['en'])
         return Transformer(**self.config['model']).to(get_device())
@@ -111,18 +130,19 @@ class Main:
     #  -------- translate -----------
     #
     def translate(self):
-        print("[––– TRANSLATE ---]")
+        logging.info("TRANSLATE")
         for idx, sent in enumerate(self.config['predict']):
-            print(f"[{idx}] {sent} -> {predict(self.model, self.data, sent)}")
+            logging.info(f"[{idx}] {sent} -> {predict(self.model, self.data, sent)}")
 
     #
     #
     #  -------- train -----------
     #
     def train(self):
-        print("[––– BEGIN TRAINING ---]")
+        logging.info("BEGIN TRAINING")
         try:
             for e in range(1, self.config['training']['epochs'] + 1):
+                self.train_log["epoch"].append(e)
 
                 # get data loaders (train, validation)
                 train_loader = self.data.get_dataloader('train', batch_size=self.config['training']['batch_size'])
@@ -130,56 +150,55 @@ class Main:
 
                 # train and measure time
                 start_time = timer()
-                train_loss = train(self.model, self.optimizer, self.loss_fn, train_loader)
+                self.train_log["train_loss"].append(train(self.model, self.optimizer, self.loss_fn, train_loader))
                 end_time = timer()
 
                 # evaluate and process scheduler and early stopping
-                val_loss = evaluate(self.model, self.loss_fn, val_loader)
-                self.scheduler.step(val_loss)
-                self.stopper.step(val_loss)
+                self.train_log["val_loss"].append(evaluate(self.model, self.loss_fn, val_loader))
+                self.scheduler.step(self.train_log["val_loss"][-1])
+                self.stopper.step(self.train_log["val_loss"][-1])
 
                 if self.stopper.should_save:
-                    self.save(e, train_loss, val_loss)
+                    self.save(e, self.train_log["train_loss"][-1], self.train_log["val_loss"][-1])
 
                 if self.stopper.should_stop:
-                    print("[––– Early stopping interrupted training ---]")
+                    logging.info("Early stopping interrupted training")
                     break
 
-                # append current data to log, print according to report setting
-                self.train_log.append([e, train_loss, val_loss])
+                # append current data to log
                 if e % self.config['training']['report_every'] == 0:
-                    print(self.string_format['epoch'](e), '\t',
-                          self.string_format['loss']('train', train_loss), '\t',
-                          self.string_format['loss']('val', val_loss), '\t',
-                          self.string_format['duration'](start_time, end_time)
-                          )
+                    logging.info(self.string_format['epoch'](self.train_log["epoch"][-1]), '\t',
+                                 self.string_format['loss']('train', self.train_log["train_loss"][-1]), '\t',
+                                 self.string_format['loss']('val', self.train_log["val_loss"][-1]), '\t',
+                                 self.string_format['duration'](start_time, end_time)
+                                 )
 
         # handle user keyboard interruption
         except KeyboardInterrupt:
-            print("[––– User interrupted training, trying to proceed and save model ---]")
+            logging.info("User interrupted training, trying to proceed and save model")
 
-        # write train log, and if exists load last saved model
+        # if exists load last saved model
         finally:
-            self._write_log(self.train_log)
-
             try:
                 info = self.load()
-                print("[––– Loaded best model from checkpoint ---]")
-                print(self.string_format['epoch'](info['epoch']), '\t',
-                      self.string_format['loss']('train', info['train_loss']), '\t',
-                      self.string_format['loss']('val', info['val_loss']),
-                      )
+                logging.info("Loaded best model from checkpoint")
+                logging.info(self.string_format['epoch'](info['epoch']), '\t',
+                             self.string_format['loss']('train', info['train_loss']), '\t',
+                             self.string_format['loss']('val', info['val_loss']),
+                             )
 
+            # use last internal model
             except FileNotFoundError:
-                print("[––– No saved model found, last internal model ---]")
+                logging.info("No saved model found, last internal model")
 
     #
     #
     #  -------- save -----------
     #
     def save(self, epoch: int, train_loss: float, val_loss: float):
+        logging.debug("Saving model to file")
         save(
-            self.config['training']['log_path'] + 'model.pth',
+            self.config['training']['log_path'] + self.start_time + '--model.pth',
             self.model,
             self.config['model'],
             epoch=epoch,
@@ -191,21 +210,26 @@ class Main:
     #
     #  -------- load -----------
     #
-    def load(self) -> dict:
-        path_model: str = self.config['training']['log_path'] + 'model.pth'
+    def load(self, path: str = None) -> dict:
+        logging.debug("Loading model to file")
 
-        self.model, info = load(path_model, Transformer)
+        if not path:
+            path: str = self.config['training']['log_path'] + self.start_time + '--model.pth'
+
+        self.model, info = load(path, Transformer)
         return info
 
     #
     #
-    #  -------- _write_log -----------
+    #  -------- write_result -----------
     #
-    def _write_log(self, content: Any):
-        path_log: str = self.config['training']['log_path'] + "log.txt"
+    def write_result(self):
+        path_log: str = self.config['training']['log_path'] + self.start_time + "--results.json"
 
-        with open(path_log, "a+") as log_file:
-            pprint.pprint(content, log_file)
+        save_json(path_log, {
+            "config": self.config,
+            "train_log": self.train_log
+        })
 
 
 #
