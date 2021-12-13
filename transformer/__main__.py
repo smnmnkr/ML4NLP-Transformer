@@ -170,8 +170,7 @@ class Main:
                     logging.info(self.string_format['epoch'](self.train_log["epoch"][-1]) + '\t' +
                                  self.string_format['loss']('train', self.train_log["train_loss"][-1]) + '\t' +
                                  self.string_format['loss']('val', self.train_log["val_loss"][-1]) + '\t' +
-                                 self.string_format['duration'](start_time, end_time)
-                                 )
+                                 self.string_format['duration'](start_time, end_time))
 
         # handle user keyboard interruption
         except KeyboardInterrupt:
@@ -182,10 +181,9 @@ class Main:
             try:
                 info = self.load()
                 logging.info("Loaded best model from checkpoint")
-                logging.info(self.string_format['epoch'](info['epoch']), '\t',
-                             self.string_format['loss']('train', info['train_loss']), '\t',
-                             self.string_format['loss']('val', info['val_loss']),
-                             )
+                logging.info(self.string_format['epoch'](info['epoch']) + '\t' +
+                             self.string_format['loss']('train', info['train_loss']) + '\t' +
+                             self.string_format['loss']('val', info['val_loss']))
 
             # use last internal model
             except FileNotFoundError:
