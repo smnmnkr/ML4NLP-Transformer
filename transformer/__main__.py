@@ -125,8 +125,8 @@ class Main:
             for e in range(1, self.config['training']['epochs'] + 1):
 
                 # get data loaders (train, validation)
-                train_loader = self.data.get_dataloader('train')
-                val_loader = self.data.get_dataloader('valid')
+                train_loader = self.data.get_dataloader('train', batch_size=self.config['training']['batch_size'])
+                val_loader = self.data.get_dataloader('valid', batch_size=self.config['training']['batch_size'])
 
                 # train and measure time
                 start_time = timer()
