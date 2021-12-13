@@ -167,9 +167,9 @@ class Main:
 
                 # append current data to log
                 if e % self.config['training']['report_every'] == 0:
-                    logging.info(self.string_format['epoch'](self.train_log["epoch"][-1]), '\t',
-                                 self.string_format['loss']('train', self.train_log["train_loss"][-1]), '\t',
-                                 self.string_format['loss']('val', self.train_log["val_loss"][-1]), '\t',
+                    logging.info(self.string_format['epoch'](self.train_log["epoch"][-1]) + '\t' +
+                                 self.string_format['loss']('train', self.train_log["train_loss"][-1]) + '\t' +
+                                 self.string_format['loss']('val', self.train_log["val_loss"][-1]) + '\t' +
                                  self.string_format['duration'](start_time, end_time)
                                  )
 
