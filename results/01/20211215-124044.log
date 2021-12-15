@@ -1,0 +1,17 @@
+2021-12-15 12:40:44,398 [INFO] -- LOAD DATA
+2021-12-15 12:40:50,075 [INFO] -- LOAD TRANSFORMER
+2021-12-15 12:40:53,840 [INFO] -- TRANSLATE
+2021-12-15 12:40:53,897 [INFO] -- [0] ein mann steht auf einem baugerüst . ->  Rows love curb curb curb curb curb curb curb curb curb curb curb
+2021-12-15 12:40:53,939 [INFO] -- [1] männer spielen auf trommeln . ->  dolls times times organize shoulders trip times organize times organize shoulders
+2021-12-15 12:40:53,988 [INFO] -- [2] ein kind läuft auf einem weg . ->  hairnet hairnet zombies stationed stationed stationed stationed stationed stationed stationed stationed stationed stationed
+2021-12-15 12:40:53,988 [INFO] -- BEGIN TRAINING
+2021-12-15 12:42:48,572 [INFO] -- [5]	loss(train): 3.479	loss(val): 3.380	time: 22.632s
+2021-12-15 12:44:35,872 [INFO] -- [10]	loss(train): 2.792	loss(val): 2.942	time: 20.341s
+2021-12-15 12:46:24,739 [INFO] -- [15]	loss(train): 2.351	loss(val): 2.739	time: 20.618s
+2021-12-15 12:46:40,663 [INFO] -- User interrupted training, trying to proceed and save model
+2021-12-15 12:46:41,358 [INFO] -- Loaded best model from checkpoint
+2021-12-15 12:46:41,358 [INFO] -- [15]	loss(train): 2.351	loss(val): 2.739
+2021-12-15 12:46:41,358 [INFO] -- TRANSLATE
+2021-12-15 12:46:41,409 [INFO] -- [0] ein mann steht auf einem baugerüst . ->  A lady is standing on a ladder holding a piece of paper .
+2021-12-15 12:46:41,448 [INFO] -- [1] männer spielen auf trommeln . ->  The band is playing music on the floor . 
+2021-12-15 12:46:41,498 [INFO] -- [2] ein kind läuft auf einem weg . ->  A person is running on a field running through a field . 

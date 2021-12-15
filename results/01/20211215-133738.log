@@ -1,0 +1,37 @@
+2021-12-15 13:37:38,553 [INFO] -- LOAD DATA
+2021-12-15 13:37:44,215 [INFO] -- LOAD TRANSFORMER
+2021-12-15 13:37:48,377 [INFO] -- TRANSLATE
+2021-12-15 13:37:48,457 [INFO] -- [0] ein mann steht auf einem baugerüst . ->  spree spree spree spree spree spree spree spree spree spree spree spree spree
+2021-12-15 13:37:48,518 [INFO] -- [1] männer spielen auf trommeln . ->  spree spree spree spree spree spree spree spree spree spree spree
+2021-12-15 13:37:48,589 [INFO] -- [2] ein kind läuft auf einem weg . ->  spree spree spree spree spree spree spree spree spree spree spree spree spree
+2021-12-15 13:37:48,589 [INFO] -- BEGIN TRAINING
+2021-12-15 13:41:06,107 [INFO] -- [5]	loss(train): 3.830	loss(val): 3.761	time: 38.586s
+2021-12-15 13:44:20,525 [INFO] -- [10]	loss(train): 3.180	loss(val): 3.221	time: 38.575s
+2021-12-15 13:47:36,689 [INFO] -- [15]	loss(train): 2.678	loss(val): 2.848	time: 38.540s
+2021-12-15 13:50:51,086 [INFO] -- [20]	loss(train): 2.206	loss(val): 2.403	time: 38.615s
+2021-12-15 13:54:05,011 [INFO] -- [25]	loss(train): 1.862	loss(val): 2.185	time: 36.372s
+2021-12-15 13:57:19,152 [INFO] -- [30]	loss(train): 1.596	loss(val): 2.043	time: 36.755s
+2021-12-15 14:00:34,406 [INFO] -- [35]	loss(train): 1.404	loss(val): 1.978	time: 36.730s
+2021-12-15 14:03:52,333 [INFO] -- [40]	loss(train): 1.236	loss(val): 1.940	time: 38.532s
+2021-12-15 14:07:09,767 [INFO] -- [45]	loss(train): 1.093	loss(val): 1.923	time: 38.252s
+2021-12-15 14:10:23,777 [INFO] -- [50]	loss(train): 0.948	loss(val): 1.870	time: 38.135s
+2021-12-15 14:13:34,797 [INFO] -- [55]	loss(train): 0.890	loss(val): 1.873	time: 36.758s
+2021-12-15 14:16:42,000 [INFO] -- [60]	loss(train): 0.859	loss(val): 1.869	time: 36.739s
+2021-12-15 14:19:52,919 [INFO] -- [65]	loss(train): 0.850	loss(val): 1.869	time: 36.770s
+2021-12-15 14:23:01,982 [INFO] -- [70]	loss(train): 0.840	loss(val): 1.868	time: 38.575s
+2021-12-15 14:26:08,399 [INFO] -- [75]	loss(train): 0.838	loss(val): 1.868	time: 36.807s
+2021-12-15 14:29:14,743 [INFO] -- [80]	loss(train): 0.835	loss(val): 1.869	time: 36.776s
+2021-12-15 14:32:21,034 [INFO] -- [85]	loss(train): 0.834	loss(val): 1.869	time: 36.752s
+2021-12-15 14:35:27,461 [INFO] -- [90]	loss(train): 0.834	loss(val): 1.869	time: 36.785s
+2021-12-15 14:38:33,887 [INFO] -- [95]	loss(train): 0.831	loss(val): 1.870	time: 36.810s
+2021-12-15 14:41:40,331 [INFO] -- [100]	loss(train): 0.829	loss(val): 1.870	time: 36.811s
+2021-12-15 14:44:46,770 [INFO] -- [105]	loss(train): 0.827	loss(val): 1.871	time: 36.794s
+2021-12-15 14:47:53,271 [INFO] -- [110]	loss(train): 0.827	loss(val): 1.871	time: 36.809s
+2021-12-15 14:50:59,707 [INFO] -- [115]	loss(train): 0.824	loss(val): 1.872	time: 36.800s
+2021-12-15 14:53:38,986 [INFO] -- User interrupted training, trying to proceed and save model
+2021-12-15 14:53:40,123 [INFO] -- Loaded best model from checkpoint
+2021-12-15 14:53:40,123 [INFO] -- [69]	loss(train): 0.843	loss(val): 1.867
+2021-12-15 14:53:40,124 [INFO] -- TRANSLATE
+2021-12-15 14:53:40,139 [INFO] -- [0] ein mann steht auf einem baugerüst . ->  . 
+2021-12-15 14:53:40,153 [INFO] -- [1] männer spielen auf trommeln . ->  . 
+2021-12-15 14:53:40,168 [INFO] -- [2] ein kind läuft auf einem weg . ->  . 
