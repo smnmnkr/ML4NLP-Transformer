@@ -15,13 +15,11 @@ class TrainableEncoding(nn.Module):
     def __init__(self,
                  emb_size: int,
                  dropout: float,
-                 maxlen: int = 500):
+                 maxlen: int = 5000):
         super(TrainableEncoding, self).__init__()
 
-        self.pos_embedding = torch.nn.Parameter(torch.randn(maxlen, emb_size)).to(get_device())
+        self.pos_embedding = torch.nn.Parameter(torch.randn((maxlen, emb_size)).unsqueeze(-2)).to(get_device())
         self.dropout = nn.Dropout(dropout)
-
-        self.init_weights()
 
     #
     #
