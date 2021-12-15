@@ -30,15 +30,6 @@ class TrainableEncoding(nn.Module):
     def forward(self, token_embedding: Tensor):
         return self.dropout(token_embedding + self.pos_embedding[:token_embedding.size(0), :])
 
-    #
-    #
-    #  -------- init_weights -----------
-    #
-    def init_weights(self):
-        for p in self.parameters():
-            if p.dim() > 1:
-                nn.init.xavier_uniform_(p)
-
 
 class TrigonometricEncoding(nn.Module):
     #
