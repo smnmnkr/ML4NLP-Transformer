@@ -1,11 +1,11 @@
 {
   "model": {
-    "num_encoder_layers": 4,
-    "num_decoder_layers": 4,
+    "num_encoder_layers": 6,
+    "num_decoder_layers": 6,
     "emb_size": 512,
     "nhead": 8,
-    "dim_feedforward": 512,
-    "dropout": 0.3
+    "dim_feedforward": 2048,
+    "dropout": 0.2
   },
   "training": {
     "seed": 42,
