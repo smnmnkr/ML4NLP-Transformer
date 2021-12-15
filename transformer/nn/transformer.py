@@ -1,7 +1,7 @@
 import torch.nn as nn
 from torch import Tensor
 
-from .positionalencoding import TrainableEncoding
+from .positionalencoding import SinusoidalEncoding
 from .tokenembedding import TokenEmbedding
 
 
@@ -33,7 +33,7 @@ class Transformer(nn.Module):
         self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size, dropout=dropout)
         self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size, dropout=dropout)
 
-        self.positional_encoding = TrainableEncoding(
+        self.positional_encoding = SinusoidalEncoding(
             emb_size, dropout=dropout)
 
         self.init_weights()
