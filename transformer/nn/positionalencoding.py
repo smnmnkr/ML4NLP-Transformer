@@ -29,7 +29,7 @@ class TrainableEncoding(nn.Module):
         return self.dropout(token_embedding + self.pos_embedding[:token_embedding.size(0), :])
 
 
-class TrigonometricEncoding(nn.Module):
+class SinusoidalEncoding(nn.Module):
     #
     #
     #  -------- __init__ -----------
@@ -38,7 +38,7 @@ class TrigonometricEncoding(nn.Module):
                  emb_size: int,
                  dropout: float,
                  maxlen: int = 5000):
-        super(TrigonometricEncoding, self).__init__()
+        super(SinusoidalEncoding, self).__init__()
 
         den = torch.exp(- torch.arange(0, emb_size, 2) * math.log(10000) / emb_size)
         pos = torch.arange(0, maxlen).reshape(maxlen, 1)
