@@ -12,7 +12,7 @@
     "epochs": 200,
     "report_every": 5,
     "batch_size": 256,
-    "log_path": "./results/01/",
+    "log_path": "./results/",
     "optimizer": {
       "lr": 1e-4,
       "betas": [
@@ -27,8 +27,8 @@
       "min_lr": 1e-6
     },
     "stopper": {
-      "delta": 2e-2,
-      "patience": 20
+      "delta": 2e-3,
+      "patience": 10
     }
   },
   "predict": [
